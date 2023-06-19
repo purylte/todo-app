@@ -32,16 +32,16 @@ public class TodoController : ControllerBase
     }
 
     [HttpPost("")]
-    public IActionResult CreateTodo(CreateTodoRequest request)
+    public IActionResult CreateTodo(TodoRequest request)
     {
-        var todo = _todoService.CreateTodo(request);
+        var todo = _todoService.CreateUserTodo(request);
         return CreatedAtAction(nameof(GetTodoById), new { id = todo.Id }, todo);
     }
     
-    [HttpPut("")]
-    public IActionResult CreateTodo(UpdateTodoRequest request)
+    [HttpPut("{id}")]
+    public IActionResult CreateTodo(int id, TodoRequest request)
     {
-        var todo = _todoService.UpdateTodo(request);
+        var todo = _todoService.UpdateUserTodoById(id, request);
         return Ok(todo);
     }
 

@@ -11,8 +11,8 @@ public interface ITodoService
 {
     List<TodoResponse> GetAllUserTodo(GetTodoRequest request);
     TodoResponse GetUserTodoById(int id);
-    TodoResponse CreateTodo(CreateTodoRequest request);
-    TodoResponse UpdateTodo(UpdateTodoRequest request);
+    TodoResponse CreateUserTodo(TodoRequest request);
+    TodoResponse UpdateUserTodoById(int id, TodoRequest request);
     void DeleteUserTodoById(int id);
 }
 
@@ -47,7 +47,6 @@ public class TodoService : ITodoService
                 t.LastUpdated >= request.LastUpdatedRange.StartDate);
 
 
-        IOrderedQueryable<Todo> orderedUserTodo;
         var sortByExpressions = new Dictionary<SortByOption, Expression<Func<Todo, object>>>
         {
             { SortByOption.TimeCreated, t => t.TimeCreated },
@@ -61,12 +60,11 @@ public class TodoService : ITodoService
         
         var orderByExpression = sortByExpressions[request.SortBy];
 
-        if (request.SortDirection == SortDirection.Asc)
-            orderedUserTodo = userTodo.OrderBy(orderByExpression);
-        else
-            orderedUserTodo = userTodo.OrderByDescending(orderByExpression);
-
-
+        IOrderedQueryable<Todo> orderedUserTodo = 
+            request.SortDirection == SortDirection.Asc ? 
+            userTodo.OrderBy(orderByExpression) : 
+            userTodo.OrderByDescending(orderByExpression);
+        
         var responses = new List<TodoResponse>();
         foreach (var todo in orderedUserTodo.ToList())
         {
@@ -82,7 +80,7 @@ public class TodoService : ITodoService
         return responses;
     }
 
-    public TodoResponse CreateTodo(CreateTodoRequest request)
+    public TodoResponse CreateUserTodo(TodoRequest request)
     {
         var user = _userService.GetCurrentUser();
 
@@ -125,12 +123,12 @@ public class TodoService : ITodoService
         };
     }
 
-    public TodoResponse UpdateTodo(UpdateTodoRequest request)
+    public TodoResponse UpdateUserTodoById(int id, TodoRequest request)
     {
         var user = _userService.GetCurrentUser();
-        var todo = _context.Todo.SingleOrDefault(t => t.User.Equals(user) && t.Id.Equals(request.Id));
+        var todo = _context.Todo.SingleOrDefault(t => t.User.Equals(user) && t.Id.Equals(id));
         if (todo is null) throw new ApiException {
-            ErrorMessage = $"Todo with id {request.Id} is not found.", 
+            ErrorMessage = $"Todo with id {id} is not found.", 
             StatusCode = HttpStatusCode.NotFound};
         todo.IsDone = request.IsDone;
         todo.Body = request.Body;

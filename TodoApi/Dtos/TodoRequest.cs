@@ -1,6 +1,6 @@
 ﻿namespace TodoApi.Dtos;
 
-public class CreateTodoRequest
+public class TodoRequest
 {
     public required string Body { get; set; }
     
