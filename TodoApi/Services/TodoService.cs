@@ -13,6 +13,7 @@ public interface ITodoService
     TodoResponse GetUserTodoById(int id);
     TodoResponse CreateTodo(CreateTodoRequest request);
     TodoResponse UpdateTodo(UpdateTodoRequest request);
+    void DeleteUserTodoById(int id);
 }
 
 public class TodoService : ITodoService
@@ -143,6 +144,17 @@ public class TodoService : ITodoService
             LastUpdated = todo.LastUpdated,
             TimeCreated = todo.TimeCreated
         };
+    }
+
+    public void DeleteUserTodoById(int id)
+    {
+        var user = _userService.GetCurrentUser();
+        var todo = _context.Todo.SingleOrDefault(t => t.User.Equals(user) && t.Id.Equals(id));
+        if (todo is null) throw new ApiException {
+            ErrorMessage = $"Todo with id {id} is not found.", 
+            StatusCode = HttpStatusCode.NotFound};
+        _context.Todo.Remove(todo);
+        _context.SaveChangesAsync();
     }
 }
 

@@ -44,4 +44,11 @@ public class TodoController : ControllerBase
         var todo = _todoService.UpdateTodo(request);
         return Ok(todo);
     }
+
+    [HttpDelete("{id}")]
+    public IActionResult DeleteTodo(int id)
+    {
+        _todoService.DeleteUserTodoById(id);
+        return NoContent();
+    }
 }
