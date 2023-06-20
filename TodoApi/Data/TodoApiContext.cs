@@ -9,16 +9,7 @@ public class TodoApiContext : DbContext
     {
         
     }
-    public DbSet<User> User { get; set; }
-    
-    public DbSet<Todo> Todo { get; set; }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Todo>()
-            .Property(t => t.TimeCreated)
-            .HasDefaultValueSql("now()");
-    }
-
-
+    public DbSet<User> Users { get; set; }
+    public DbSet<Todo> Todos { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 }

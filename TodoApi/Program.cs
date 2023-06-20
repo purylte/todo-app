@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using TodoApi.Data;
 using TodoApi.Services;
 using Swashbuckle.AspNetCore.Filters;
+using TodoApi.Helpers;
 using TodoApi.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +25,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IJwtUtils, JwtUtils>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITodoService, TodoService>();
 

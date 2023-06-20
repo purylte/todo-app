@@ -31,7 +31,7 @@ public class TodoService : ITodoService
     {
         var user = _userService.GetCurrentUser();
 
-        var userTodo = _context.Todo.Where(t => t.User.Equals(user));
+        var userTodo = user.Todos.AsQueryable();
 
         if (request.IsDone != null)
             userTodo = userTodo.Where(t => t.IsDone.Equals(request.IsDone));
@@ -85,14 +85,9 @@ public class TodoService : ITodoService
         var user = _userService.GetCurrentUser();
 
         var todo = new Todo {
-            User = user,
             Body = request.Body,
             IsDone = request.IsDone
         };
-        _context.Todo.Add(todo);
-        _context.SaveChanges();
-        _context.Todo.Entry(todo).Reload();
-        user.Todos ??= new List<Todo>(); 
         user.Todos.Add(todo); 
         _context.SaveChanges();
         return new TodoResponse
@@ -108,7 +103,7 @@ public class TodoService : ITodoService
     public TodoResponse GetUserTodoById(int id)
     {
         var user = _userService.GetCurrentUser();
-        var todo = _context.Todo.SingleOrDefault(t => t.User.Equals(user) && t.Id.Equals(id));
+        var todo = user.Todos.SingleOrDefault(t => t.Id.Equals(id));
         if (todo is null) throw new ApiException {
             ErrorMessage = $"Todo with id {id} is not found.", 
             StatusCode = HttpStatusCode.NotFound
@@ -126,14 +121,13 @@ public class TodoService : ITodoService
     public TodoResponse UpdateUserTodoById(int id, TodoRequest request)
     {
         var user = _userService.GetCurrentUser();
-        var todo = _context.Todo.SingleOrDefault(t => t.User.Equals(user) && t.Id.Equals(id));
+        var todo = user.Todos.SingleOrDefault(t => t.Id.Equals(id));
         if (todo is null) throw new ApiException {
             ErrorMessage = $"Todo with id {id} is not found.", 
             StatusCode = HttpStatusCode.NotFound};
         todo.IsDone = request.IsDone;
         todo.Body = request.Body;
         _context.SaveChanges();
-        _context.Todo.Entry(todo).Reload();
         return new TodoResponse
         {
             Id = todo.Id,
@@ -147,11 +141,11 @@ public class TodoService : ITodoService
     public void DeleteUserTodoById(int id)
     {
         var user = _userService.GetCurrentUser();
-        var todo = _context.Todo.SingleOrDefault(t => t.User.Equals(user) && t.Id.Equals(id));
+        var todo = user.Todos.SingleOrDefault(t => t.Id.Equals(id));
         if (todo is null) throw new ApiException {
             ErrorMessage = $"Todo with id {id} is not found.", 
             StatusCode = HttpStatusCode.NotFound};
-        _context.Todo.Remove(todo);
+        user.Todos.Remove(todo);
         _context.SaveChangesAsync();
     }
 }
